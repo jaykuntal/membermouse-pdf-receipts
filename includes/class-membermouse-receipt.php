@@ -230,6 +230,9 @@ class MemberMouse_Receipt
         $renameReturnValue = rename($tmp_prefix, $full_path);
         if ($renameReturnValue) {
             $dompdf = new Dompdf();
+            $options = $dompdf->getOptions();
+            $options->setIsRemoteEnabled("true");
+            $dompdf->setOptions($options);
 
             // Load HTML
             $dompdf->loadHtml($this->generatePDFHtml());
@@ -271,125 +274,124 @@ class MemberMouse_Receipt
 <meta charset='utf-8'>
 <title><?php echo $businessName; ?> Receipt</title>
 <link
-	href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap"
-	rel="stylesheet">
+    href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap"
+    rel="stylesheet">
 <link rel="stylesheet"
-	href="<?php echo plugin_dir_path(__FILE__) .'css/receipt.css'; ?>">
+    href="<?php echo plugin_dir_url(__FILE__) .'css/receipt.css'; ?>">
 </head>
-
 <body>
-	<div class="pdf-container">
-		<?php if(!empty($headerImageUri)) { ?>
-		<div style="margin-bottom: 10px; <?php if(!empty($headerImageAlign)) { ?>text-align:<?php echo $headerImageAlign; ?>;<?php } ?>">
-    		<img src="<?php echo $headerImageUri; ?>" alt="" />
-    	</div>
-    	<?php } ?>
-		<div class="row title-row" <?php if(!empty($borderColor)) { ?>style="border-top: 4px solid <?php echo $borderColor; ?>"<?php } ?>>
-			<p>
-				<?php if($this->isTest) { ?>
-				<strong><span style="color:#c00"><?php echo _mmpdft("TEST RECEIPT"); ?></span></strong><br/>
-				<?php } ?>
-				<strong><?php echo $businessName; ?></strong><br /> 
-				<?php echo $businessAddress; ?><br/>
-				<?php if(!empty($businessTaxId)) { ?>
-				<?php echo _mmpdft("Tax ID"); ?>: <?php echo $businessTaxId; ?>
-				<?php } ?>
-			</p>
-		</div>
+    <div class="pdf-container">
+        <?php if(!empty($headerImageUri)) { ?>
+        <div style="margin-bottom: 10px; <?php if(!empty($headerImageAlign)) { ?>text-align:<?php echo $headerImageAlign; ?>;<?php } ?>">
+            <img src="<?php echo $headerImageUri; ?>" alt="" />
+        </div>
+        <?php } ?>
+        <div class="row title-row" <?php if(!empty($borderColor)) { ?>style="border-top: 4px solid <?php echo $borderColor; ?>"<?php } ?>>
+            <p>
+                <?php if($this->isTest) { ?>
+                <strong><span style="color:#c00"><?php echo _mmpdft("TEST RECEIPT"); ?></span></strong><br/>
+                <?php } ?>
+                <strong><?php echo $businessName; ?></strong><br /> 
+                <?php echo $businessAddress; ?><br/>
+                <?php if(!empty($businessTaxId)) { ?>
+                <?php echo _mmpdft("Tax ID"); ?>: <?php echo $businessTaxId; ?>
+                <?php } ?>
+            </p>
+        </div>
 
-		<div class="row receipt-table">
-			<div class="receipt-top">
-				<div class="receipt-info">
-					<div>
-						<strong><?php echo _mmpdft("MEMBER ID"); ?>:</strong> <?php echo $this->member_id; ?></div>
-					<br /> <br />
+        <div class="row receipt-table">
+            <div class="receipt-top">
+                <div class="receipt-info">
+                    <div>
+                        <strong><?php echo _mmpdft("MEMBER ID"); ?>:</strong> <?php echo $this->member_id; ?></div>
+                    <br /> <br />
                 <?php if($this->extra_info) : ?>
                   <div><?php echo $this->extra_info; ?></div>
                 <?php else: ?>
-                 	<div><?php echo $this->fname; ?> <?php echo $this->lname; ?></div>
-					<div><?php echo $this->email; ?></div>
-					<div><?php echo $this->address1; ?></div>
-                	<?php if($this->address2) : ?>
-                  	<div><?php echo $this->address2; ?></div>
-                	<?php endif; ?>
-                	<div><?php echo $this->city; ?><?php echo ($this->city && $this->state)?",":""; ?> <?php echo $this->state; ?> <?php echo $this->address1?$this->zip:""; ?></div>
+                    <div><?php echo $this->fname; ?> <?php echo $this->lname; ?></div>
+                    <div><?php echo $this->email; ?></div>
+                    <div><?php echo $this->address1; ?></div>
+                    <?php if($this->address2) : ?>
+                    <div><?php echo $this->address2; ?></div>
+                    <?php endif; ?>
+                    <div><?php echo $this->city; ?><?php echo ($this->city && $this->state)?",":""; ?> <?php echo $this->state; ?> <?php echo $this->address1?$this->zip:""; ?></div>
                 <?php endif; ?>
               </div>
-				<div class="receipt-date">
-					<div>
-						<strong><?php echo _mmpdft("DATE PAID"); ?>:</strong> <?php echo $this->order_date; ?></div>
-				</div>
-			</div>
+                <div class="receipt-date">
+                    <div>
+                        <strong><?php echo _mmpdft("DATE PAID"); ?>:</strong> <?php echo $this->order_date; ?></div>
+                </div>
+            </div>
             <?php if(!empty($this->order_currency)) { ?>
             <div class="receipt-top-extra">
-				<p>
-					<em><?php echo _mmpdft("All prices in"); ?> <?php echo $this->order_currency; ?></em>
-				</p>
-			</div>
-			<?php } ?>
-			
+                <p>
+                    <em><?php echo _mmpdft("All prices in"); ?> <?php echo $this->order_currency; ?></em>
+                </p>
+            </div>
+            <?php } ?>
+            
             <table>
-				<thead>
-					<tr>
-						<th class="left-align"><?php echo _mmpdft("Service Description"); ?></th>
-						<th class="right-align"><?php echo _mmpdft("Order"); ?> #</th>
-						<th></th>
-						    <th class="right-align"><?php echo _mmpdft("Amount"); ?></th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td><?php echo $this->product_name; ?></td>
-						<td class="right-align"><?php echo $this->order_number; ?></td>
-						<td class="right-align"><?php echo _mmpdft("Subtotal"); ?></td>
-						<td class="right-align"><?php echo _mmf($this->order_subtotal, $this->order_currency); ?></td>
-					</tr>
-				<?php if(isset($this->order_shipping) && floatval($this->order_shipping) > 0) : ?>
-                	<tr>
-						<td></td>
-						<td></td>
-						<td class="right-align"><?php echo _mmpdft("Shipping"); ?></td>
-						<td class="right-align"><?php echo _mmf($this->order_shipping, $this->order_currency); ?></td>
-					</tr>
+                <thead>
+                    <tr>
+                        <th class="left-align"><?php echo _mmpdft("Service Description"); ?></th>
+                        <th class="right-align"><?php echo _mmpdft("Order"); ?> #</th>
+                        <th></th>
+                            <th class="right-align"><?php echo _mmpdft("Amount"); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><?php echo $this->product_name; ?></td>
+                        <td class="right-align"><?php echo $this->order_number; ?></td>
+                        <td class="right-align"><?php echo _mmpdft("Subtotal"); ?></td>
+                        <td class="right-align"><?php echo _mmf($this->order_subtotal, $this->order_currency); ?></td>
+                    </tr>
+                <?php if(isset($this->order_shipping) && floatval($this->order_shipping) > 0) : ?>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td class="right-align"><?php echo _mmpdft("Shipping"); ?></td>
+                        <td class="right-align"><?php echo _mmf($this->order_shipping, $this->order_currency); ?></td>
+                    </tr>
                 <?php endif; ?>
                 <?php if(isset($this->order_discount) && floatval($this->order_discount) > 0) : ?>
-                	<tr>
-						<td></td>
-						<td></td>
-						<td class="right-align"><?php echo _mmpdft("Discount"); ?></td>
-						<td class="right-align"><?php echo _mmf($this->order_discount, $this->order_currency); ?></td>
-					</tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td class="right-align"><?php echo _mmpdft("Discount"); ?></td>
+                        <td class="right-align"><?php echo _mmf($this->order_discount, $this->order_currency); ?></td>
+                    </tr>
                 <?php endif; ?>
-					<tr>
-						<td>&nbsp;</td>
-						<td>&nbsp;</td>
-						<td>&nbsp;</td>
-						<td>&nbsp;</td>
-					</tr>
-                	<tr>
-						<td></td>
-						<td></td>
-						<td class="total-paid-td right-align first"><strong><?php echo _mmpdft("TOTAL PAID"); ?></strong></td>
-						<td class="total-paid-td right-align"><strong><?php echo _mmf($this->order_total, $this->order_currency); ?></strong></td>
-					</tr>
-					<tr>
-						<td>&nbsp;</td>
-						<td>&nbsp;</td>
-						<td>&nbsp;</td>
-						<td>&nbsp;</td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td class="total-paid-td right-align first"><strong><?php echo _mmpdft("TOTAL PAID"); ?></strong></td>
+                        <td class="total-paid-td right-align"><strong><?php echo _mmf($this->order_total, $this->order_currency); ?></strong></td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-		<div class="receipt-bottom">
-			<?php echo $receiptFooterSection1; ?>
-		</div>
-		<div class="receipt-footer" <?php if(!empty($borderColor)) { ?>style="border-bottom: 4px solid <?php echo $borderColor; ?>"<?php } ?>>
-			<?php echo $receiptFooterSection2; ?>
-		</div>
+        <div class="receipt-bottom">
+            <?php echo $receiptFooterSection1; ?>
+        </div>
+        <div class="receipt-footer" <?php if(!empty($borderColor)) { ?>style="border-bottom: 4px solid <?php echo $borderColor; ?>"<?php } ?>>
+            <?php echo $receiptFooterSection2; ?>
+        </div>
 
-	</div>
+    </div>
 </body>
 
 </html>
