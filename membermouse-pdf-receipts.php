@@ -48,10 +48,16 @@ function membermouse_pdf_receipts()
         $instance->settings = MemberMouse_PDF_Receipts_Settings::instance($instance);
     }
 
-    add_action('mm_payment_received', 'membermouse_receipt_pdf_action_handler');
+    add_action('mm_payment_received', 'membermouse_initial_payment_action_handler');
     add_action('mm_payment_rebill', 'membermouse_rebill_payment_action_handler');
 
     return $instance;
+}
+
+function membermouse_initial_payment_action_handler($data)
+{
+    $data["event_type"] = MM_Event::$PAYMENT_RECEIVED;
+    membermouse_receipt_pdf_action_handler($data);
 }
 
 function membermouse_rebill_payment_action_handler($data)
@@ -75,3 +81,4 @@ $myUpdateChecker = Puc_v4_Factory::buildUpdateChecker(
     __FILE__,
     'membermouse-pdf-receipts'
 );
+?>
