@@ -57,7 +57,6 @@ class MemberMouse_Receipt
     public function __construct()
     {
         $this->plugin_name = 'membermouse-pdf-receipts';
-        $this->order_date = date('M. j, Y');
     }
 
     /**
@@ -181,15 +180,7 @@ class MemberMouse_Receipt
         $this->order_shipping = $data['order_shipping'];
         $this->order_total = $data['order_total'];
         $this->order_number = $data['order_number'];
-        
-        if(isset($data["order_date"]))
-        {
-            $this->order_date = date('M. j, Y', strtotime($data["order_date"]));
-        }
-        else 
-        {
-            $this->order_date = date('M. j, Y');
-        }
+        $this->order_date = date('M. j, Y', strtotime($data["order_date"]));
         
         $this->order_currency = isset($data['order_currency']) ? $data['order_currency'] : "";
         
